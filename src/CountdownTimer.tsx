@@ -35,6 +35,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
             intervalIdRef.current = setInterval(() => {
                 const newTime = remainingTime - 1000;
                 if (newTime <= 0) {
+                    alert("⏰ Congratulations on completing another focused goal!");
                     onComplete();
                 } else {
                     onTimeChange(newTime);
