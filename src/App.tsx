@@ -1,10 +1,13 @@
-import DigitalClock from "./DigitalClock.tsx";
-import TodoList from "./TodoList.jsx";
-import HistoryView from "./HistoryView.jsx";
+import DigitalClock from "./DigitalClock";
+import TodoList from "./TodoList";
+import HistoryView from "./HistoryView";
 import { useState } from "react";
 
+type ViewType = 'tasks' | 'history';
+
 function App() {
-    const [currentView, setCurrentView] = useState('tasks');
+    const [currentView, setCurrentView] = useState<ViewType>('tasks');
+
 
     return (
         <div className="app">

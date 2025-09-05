@@ -1,17 +1,38 @@
 import React, { useState } from "react";
-import CountdownTimer from "./CountdownTimer.jsx";
+import CountdownTimer from "./CountdownTimer";
 
-const TodoList = () => {
-    const [tasks, setTasks] = useState([]);
-    const [newTask, setNewTask] = useState("");
+// 定义 Task 类型
+interface Task {
+    id: number;
+    name: string;
+    timeLeft: number;
+    isRunning: boolean;
+    completed: boolean;
+    totalTime?: number;
+}
 
-    const handleInputChange = (event) => {
+// 定义历史记录类型
+interface CompletedTask {
+    name: string;
+    duration: number;
+    completedAt: string;
+}
+
+interface TaskHistory {
+    [date: string]: CompletedTask[];
+}
+
+const TodoList: React.FC = () => {
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [newTask, setNewTask] = useState<string>("");
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setNewTask(event.target.value);
     };
 
-    const addTask = () => {
+    const addTask = (): void => {
         if (newTask.trim() !== "") {
-            const newTaskObj = {
+            const newTaskObj: Task = {
                 id: Date.now(),
                 name: newTask,
                 timeLeft: 0,
@@ -23,11 +44,11 @@ const TodoList = () => {
         }
     };
 
-    const deleteTask = (id) => {
+    const deleteTask = (id: number): void => {
         setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
     };
 
-    const toggleTimer = (id) => {
+    const toggleTimer = (id: number): void => {
         setTasks(prevTasks =>
             prevTasks.map(task => {
                 if (task.id === id) {
@@ -46,7 +67,7 @@ const TodoList = () => {
         );
     };
 
-    const updateTaskTime = (id, newTime) => {
+    const updateTaskTime = (id: number, newTime: number): void => {
         setTasks(prevTasks =>
             prevTasks.map(task =>
                 task.id === id ? { ...task, timeLeft: newTime } : task
@@ -54,16 +75,18 @@ const TodoList = () => {
         );
     };
 
-    const formatTime = (milliseconds) => {
+    const formatTime = (milliseconds: number): string => {
         const hours = Math.floor(milliseconds / (1000 * 60 * 60));
         const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-        
+
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    const completeTask = (id) => {
+    const completeTask = (id: number): void => {
         const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
         const actualDuration = (task.totalTime || task.timeLeft) - task.timeLeft;
 
         const isCompleted = window.confirm(
@@ -77,17 +100,17 @@ const TodoList = () => {
         deleteTask(id);
     };
 
-    const saveCompletedTask = (taskName, duration) => {
+    const saveCompletedTask = (taskName: string, duration: number): void => {
         try {
             const today = new Date().toDateString();
             const existingHistory = localStorage.getItem('taskHistory');
-            const history = existingHistory ? JSON.parse(existingHistory) : {};
+            const history: TaskHistory = existingHistory ? JSON.parse(existingHistory) : {};
 
             if (!history[today]) {
                 history[today] = [];
             }
 
-            const completedTask = {
+            const completedTask: CompletedTask = {
                 name: taskName,
                 duration: duration,
                 completedAt: new Date().toLocaleTimeString(),
@@ -102,12 +125,11 @@ const TodoList = () => {
         }
     };
 
-    const handleKeyPress = (event) => {
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>): void => {
         if (event.key === 'Enter') {
             addTask();
         }
     };
-
     return (
         <div className="todo-list">
             <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">

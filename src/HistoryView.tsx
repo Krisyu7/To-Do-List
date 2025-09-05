@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from "react";
 
-const HistoryView = () => {
-    const [history, setHistory] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
+// 定义类型接口（与 TodoList 保持一致）
+interface CompletedTask {
+    name: string;
+    duration: number;
+    completedAt: string;
+}
+
+interface TaskHistory {
+    [date: string]: CompletedTask[];
+}
+
+interface DayStats {
+    totalTasks: number;
+    totalDuration: number;
+    averageDuration: number;
+}
+
+const HistoryView: React.FC = () => {
+    const [history, setHistory] = useState<TaskHistory>({});
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         loadHistory();
     }, []);
 
-    const loadHistory = () => {
+    const loadHistory = (): void => {
         try {
             setIsLoading(true);
             const historyString = localStorage.getItem('taskHistory');
-            const loadedHistory = historyString ? JSON.parse(historyString) : {};
+            const loadedHistory: TaskHistory = historyString ? JSON.parse(historyString) : {};
             setHistory(loadedHistory);
         } catch (error) {
             console.error('Failed to load task history:', error);
@@ -22,7 +39,7 @@ const HistoryView = () => {
         }
     };
 
-    const deleteTaskRecord = (date, taskIndex) => {
+    const deleteTaskRecord = (date: string, taskIndex: number): void => {
         try {
             const updatedHistory = { ...history };
             updatedHistory[date].splice(taskIndex, 1);
@@ -38,11 +55,11 @@ const HistoryView = () => {
         }
     };
 
-    const clearAllHistory = () => {
+    const clearAllHistory = (): void => {
         const confirmed = window.confirm(
             'Are you sure you want to delete all history records? This operation cannot be undone!'
         );
-        
+
         if (confirmed) {
             try {
                 localStorage.removeItem('taskHistory');
@@ -53,7 +70,7 @@ const HistoryView = () => {
         }
     };
 
-    const exportHistory = () => {
+    const exportHistory = (): void => {
         try {
             const dataStr = JSON.stringify(history, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -62,7 +79,7 @@ const HistoryView = () => {
             link.href = URL.createObjectURL(dataBlob);
             link.download = `task_history_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
+
             // Clean up
             URL.revokeObjectURL(link.href);
         } catch (error) {
@@ -70,7 +87,7 @@ const HistoryView = () => {
         }
     };
 
-    const formatTime = (milliseconds) => {
+    const formatTime = (milliseconds: number): string => {
         const hours = Math.floor(milliseconds / (1000 * 60 * 60));
         const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
@@ -84,10 +101,10 @@ const HistoryView = () => {
         }
     };
 
-    const calculateDayStats = (tasks) => {
+    const calculateDayStats = (tasks: CompletedTask[]): DayStats => {
         const totalDuration = tasks.reduce((total, task) => total + task.duration, 0);
         const averageDuration = tasks.length > 0 ? totalDuration / tasks.length : 0;
-        
+
         return {
             totalTasks: tasks.length,
             totalDuration,
